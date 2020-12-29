@@ -35,6 +35,8 @@ package jarrunner;
  * Modified by MAZ
  *
  */
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -61,9 +63,21 @@ public class JarRunner {
   private final String[] args; // arguments to be passed to the application's main method.
   
   public JarRunner (final String location,
-                    final String[] args) throws MalformedURLException {  
-
-      System.out.println("Holaaaaaaaaaaaaa");
+                    final String[] args) throws MalformedURLException {
+      
+        final String path = System.getProperty("user.dir") + File.separator +
+                                                  "data" + File.separator +
+                                               "client" + File.separator +
+                                             "traza.txt" + File.separator;
+        try {
+            FileWriter myWriter = new FileWriter(path);
+            myWriter.write("Files in Java might be tricky, but it is fun enough!");
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     try {
       url = new URL(location);
     } catch (final MalformedURLException ex) {
