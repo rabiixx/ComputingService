@@ -1,0 +1,28 @@
+// Kerberos Realm: LABOPROGSEGURA.UNAVARRA.ES princ:pwd
+// admin@LABOPROGSEGURA.UNAVARRA.ES : adminPS2021
+
+grant codeBase "file:${user.dir}/dist/main.jar" {
+    permission javax.security.auth.AuthPermission "createLoginContext.SERVICE";
+    permission java.lang.RuntimePermission "readFileDescriptor";
+    permission java.lang.RuntimePermission "writeFileDescriptor";
+};
+
+
+grant codeBase "file:${user.dir}/dist/service.jar" {
+	permission java.lang.RuntimePermission "modifyThread";    
+	permission javax.security.auth.AuthPermission "doAsPrivileged";
+};
+
+
+grant codeBase "file:${user.dir}/dist/service.jar" 
+	Principal javax.security.auth.kerberos.KerberosPrincipal "admin@LABOPROGSEGURA.UNAVARRA.ES" {
+		//permission javax.security.auth.AuthPermission "doAsPrivileged";
+};
+
+grant codeBase "file:${user.dir}/dist/jarrunnera.jar" {
+
+};
+
+grant codeBase "file:${user.dir}/dist/jarrunnerb.jar" {
+
+};

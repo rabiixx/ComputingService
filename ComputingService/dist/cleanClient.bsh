@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -r client filetransfer
+rm client.jar filetransfer.jar

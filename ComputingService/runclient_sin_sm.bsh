@@ -1,0 +1,6 @@
+#!/bin/bash
+
+java -Djava.security.auth.login.config=./etc/client.conf \
+-Djava.security.krb5.realm=LABOPROGSEGURA.UNAVARRA.ES \
+-Djava.security.krb5.kdc=127.0.0.1 \
+-cp ./dist/client.jar:./dist/filetransfer.jar client.ClientLogin

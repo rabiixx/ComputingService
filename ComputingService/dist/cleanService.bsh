@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -r filetransfer frontend jarrunner service
+rm filetransfer.jar jarrunnera.jar jarrunnerb.jar main.jar service.jar

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# FileTransfer Build ( Already on client build )
+# javac -Xlint:unchecked -Xlint:deprecation -d . ../src/filetransfer/*.java 
+# jar -cvf filetransfer.jar ./filetransfer/*.class
+
+# JarRunner Build
+javac -Xlint:unchecked -Xlint:deprecation -d . ../src/jarrunner/*.java
+
+jar -cvf jarrunnera.jar ./jarrunner/JarClassLoader.class ./jarrunner/JarRunner.class ./jarrunner/JarRunnerA.class
+jar -cvf jarrunnerb.jar ./jarrunner/JarClassLoader.class ./jarrunner/JarRunner.class ./jarrunner/JarRunnerB.class
+
+# Service Build
+javac -Xlint:unchecked -Xlint:deprecation -d . ../src/service/*.java 
+jar -cvf service.jar ./service/*.class
+
+# Main Build
+javac -Xlint:unchecked -Xlint:deprecation -d . -cp service.jar:jarrunnera.jar:jarrunnerb.jar:filetransfer.jar ../src/frontend/*.java
+jar -cvf main.jar ./frontend/*

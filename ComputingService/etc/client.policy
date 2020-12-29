@@ -1,0 +1,37 @@
+
+// Kerberos Realm: LABOPROGSEGURA.UNAVARRA.ES princ:pwd
+// ligeti@LABOPROGSEGURA.UNAVARRA.ES : ligetiPS2021
+// geyer@LABOPROGSEGURA.UNAVARRA.ES : geyerPS2021
+
+grant codeBase "file:${user.dir}/dist/client.jar" {
+    
+    //permission java.io.FilePermission "${user.dir}/data/client/pi.jar", "read";
+    
+    permission javax.security.auth.AuthPermission "createLoginContext.CLIENT";
+    permission java.lang.RuntimePermission "readFileDescriptor";
+    permission java.lang.RuntimePermission "writeFileDescriptor";
+
+    permission java.util.PropertyPermission "user.dir", "read";
+    permission java.net.SocketPermission "127.0.0.1:2050", "connect,resolve";
+
+    permission java.io.FilePermission "${user.dir}/data/client/pi.jar", "read";
+    permission java.io.FilePermission "${user.dir}/data/client/piargs.txt", "read";
+    permission java.io.FilePermission "${user.dir}/data/client/pi.txt", "write";
+    
+    permission javax.security.auth.PrivateCredentialPermission
+           "javax.security.auth.x500.X500PrivateCredential javax.security.auth.kerberos.KerberosPrincipal \"ligeti@LABOPROGSEGURA.UNAVARRA.ES\"",
+           "read";
+
+
+};
+
+//grant codeBase "file:${user.dir}/dist/client.jar" 
+//    Principal javax.security.auth.kerberos.KerberosPrincipal "admin@LABOPROGSEGURA.UNAVARRA.ES" {
+//        permission java.io.FilePermission "/home/kali/Downloads/trabajo_ps/ComputingService/data/client/pi.jar", "read";
+//};
+
+grant codeBase "file:${user.dir}/dist/filetransfer.jar" {
+    permission java.io.FilePermission "${user.dir}/data/client/pi.jar", "read";
+    permission java.io.FilePermission "${user.dir}/data/client/piargs.txt", "read";
+    permission java.io.FilePermission "${user.dir}/data/client/pi.txt", "read";
+};
