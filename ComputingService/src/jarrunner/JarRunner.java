@@ -65,7 +65,8 @@ public class JarRunner {
   public JarRunner (final String location,
                     final String[] args) throws MalformedURLException {
       
-        final String path = System.getProperty("user.dir") + File.separator +
+         System.out.println("JarRunner contructor");
+        /*final String path = System.getProperty("user.dir") + File.separator +
                                                   "data" + File.separator +
                                                "client" + File.separator +
                                              "traza.txt" + File.separator;
@@ -77,7 +78,7 @@ public class JarRunner {
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
-        }
+        }*/
     try {
       url = new URL(location);
     } catch (final MalformedURLException ex) {
@@ -91,7 +92,7 @@ public class JarRunner {
 
   }
 
-  public void run () {
+  public Object run () {
 
     // Create the class classLoader for the application jar file
     final JarClassLoader classLoader = new JarClassLoader(url);
@@ -104,13 +105,13 @@ public class JarRunner {
         LOGGER.info(NO_MAIN_CLASS);
         LOGGER.log(Level.WARNING, "JarRunner (fatal error): {0}", NO_MAIN_CLASS);
         System.err.println(NO_MAIN_CLASS);
-        return;
+        return null;
       }      
     } catch (final IOException ex) {
       LOGGER.info(IO_ERROR);
       LOGGER.log(Level.WARNING, "JarRunner: {0}", IO_ERROR);
       System.err.println(IO_ERROR);
-      return;
+      return null;
     }
 
     try {
@@ -135,6 +136,8 @@ public class JarRunner {
       LOGGER.log(Level.WARNING, "JarRunner: method exception thrown", ex.getTargetException());
       System.err.println(EXCEPTION_THROWN);
     }
+    
+    return null;
 
   }
 

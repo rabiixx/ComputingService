@@ -14,11 +14,27 @@ grant codeBase "file:${user.dir}/dist/service.jar" {
 };
 
 
-grant codeBase "file:${user.dir}/dist/service.jar" 
-	Principal javax.security.auth.kerberos.KerberosPrincipal "admin@LABOPROGSEGURA.UNAVARRA.ES" {
-		//permission javax.security.auth.AuthPermission "doAsPrivileged";
+grant codeBase "file:${user.dir}/dist/service.jar" { 
+	permission java.net.SocketPermission "localhost:2050", "listen,resolve";
+	permission java.net.SocketPermission "127.0.0.1:1024-", "accept,resolve";
+	permission java.util.PropertyPermission "user.dir", "read";
+	//permission java.io.FilePermission "${user.dir}/data/service/database/CSDB.mv.db", "read";
+	//permission java.io.FilePermission "${user.dir}/data/service/database/CSDB.trace.db", "read";
+
+	permission java.io.FilePermission "${user.dir}/data/service/database/*", "read";
+	permission java.io.FilePermission "${user.dir}/data/service/database", "read";
+
+	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read, write";
 };
 
+grant codeBase "file:${user.dir}/lib/h2-1.4.197.jar" {
+	permission java.io.FilePermission "${user.dir}/data/service/database/*", "read";
+	permission java.io.FilePermission "${user.dir}/data/service/database", "read";
+};
+
+grant codeBase "file:${user.dir}/dist/filetransfer.jar" { 
+	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "write";
+};
 grant codeBase "file:${user.dir}/dist/jarrunnera.jar" {
 
 };

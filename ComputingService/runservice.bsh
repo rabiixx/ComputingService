@@ -5,4 +5,4 @@ java -Djava.security.manager \
 -Djava.security.krb5.realm=LABOPROGSEGURA.UNAVARRA.ES \
 -Djava.security.krb5.kdc=127.0.0.1 \
 -Djava.security.policy=./etc/service.policy \
--cp ./dist/main.jar:./dist/service.jar:./dist/runnera.jar:./dist/runnerb.jar:./dist/filetransfer.jar:./lib/h2-1.4.100.jar frontend.ComputingServiceLogin
+-cp ./dist/main.jar:./dist/service.jar:./dist/runnera.jar:./dist/runnerb.jar:./dist/filetransfer.jar:./lib/h2-1.4.197.jar frontend.ComputingServiceLogin

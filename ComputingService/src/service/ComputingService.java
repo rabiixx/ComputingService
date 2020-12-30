@@ -13,6 +13,8 @@ package service;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.nio.channels.Pipe;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -69,13 +71,14 @@ public final class ComputingService implements Runnable {
     // Arranque del servicio; permitido solo al administrador
     static public void start ( final Subject admin, final int port, final int numThreads ) {
         
+        System.out.println("ComputingService.start()");
+        
         AccessController.doPrivileged( new PrivilegedAction<Void>() {
             @Override
             public Void run() {
                 try {
                     if ( SINGLETON == null ) {
                         SINGLETON = new ComputingService( admin, port, numThreads );
-                        System.out.println("debuggation");
                         CSE.submit( SINGLETON );
                     }
                 } catch (Exception e) {
@@ -95,6 +98,8 @@ public final class ComputingService implements Runnable {
      // Parada del servicio: permitido solo al administrador
     static public void stop (final Subject admin) {
         
+        System.out.println("ComputingService.stot()");
+        
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             @Override
             public Void run() {
@@ -113,12 +118,16 @@ public final class ComputingService implements Runnable {
     @Override
     public void run () {
         
-        try ( final ServerSocket serverSocket = new ServerSocket( port ) ) {
+        System.out.println("ComputingService.run()");
         
-            System.out.println("ComputingService en operación");
+        try {
+            
+            
+            final ServerSocket serverSocket = new ServerSocket( port );
+        
             LOGGER.info("ComputingService en operación");
             
-            System.out.println("ServerSocket: " + serverSocket.toString() );
+            System.out.println( serverSocket.toString() );
             
             // Servicio ejecutor para implementar timeout en transacciones entrantes.
             final ExecutorService auxiliarExecutor = Executors.newSingleThreadExecutor();
@@ -136,6 +145,8 @@ public final class ComputingService implements Runnable {
                         // para conocer si el admnistrador ha detenido el servicio.
                         socket = future.get(INTERRUPTION_TIME1, MILLISECONDS);
                     } catch (final ExecutionException ex) {
+                        LOGGER.log(Level.SEVERE, "Error al intentar obtener", ex);
+                        System.out.println("error1");
                         future = auxiliarExecutor.submit(serverSocket::accept);
                     } catch (final InterruptedException | TimeoutException ex) {
                     }
@@ -153,11 +164,13 @@ public final class ComputingService implements Runnable {
             // Se detiene el ejecutor empleado en el socket de escucha.
             auxiliarExecutor.shutdown();
 
+        } catch (SecurityException ex) {
+            System.out.println("Server socket openning error");
+            LOGGER.log(Level.SEVERE, "Server socket opening error {0}", ex);
         } catch (final IOException ex) {
             LOGGER.log(Level.SEVERE, "Server socket opening error {0}", ex);
             LOGGER.log(Level.SEVERE, "", ex.getCause());
             System.out.println("Server socket openning error");
-            ex.printStackTrace();
         }
     }
 

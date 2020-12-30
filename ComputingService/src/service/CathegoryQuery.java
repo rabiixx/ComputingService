@@ -8,8 +8,10 @@ package service;
  * @author MAZ
  */
 import java.io.File;
+import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -47,12 +49,10 @@ final class CathegoryQuery {
                                               "database" + File.separator +
                                                   "CSDB";
     final String DB_URL = "jdbc:h2:file:" + dbPath;    
-    
-    System.out.println("DB_URL: " + DB_URL);
-      
+          
     try (final Connection connection =
             DriverManager.getConnection(DB_URL, dbUser, passwd)) {
-
+    
       final String selectStatement
               = "SELECT Cathegory FROM engineers WHERE IdCode = ?";       
 
@@ -88,6 +88,6 @@ final class CathegoryQuery {
       throw ex;
     }
 
-  }  
+  }
 
 }

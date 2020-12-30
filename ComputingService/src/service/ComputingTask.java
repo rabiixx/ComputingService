@@ -19,12 +19,13 @@ import java.util.logging.Logger;
 import javax.security.auth.Subject;
 //
 import filetransfer.FileTransfer;
-//import jarrunner.JarRunnerA;
-//import jarrunner.JarRunnerB;
-import jarrunner.JarRunner;
+import jarrunner.JarRunnerA;
+import jarrunner.JarRunnerB;
 import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Set;
@@ -48,16 +49,15 @@ final class ComputingTask implements Runnable {
 
     @Override
     public void run () {
-
+        
         try ( final InputStream  is = socket.getInputStream();
               final OutputStream os = socket.getOutputStream() ) {
-
+            
             final String path = System.getProperty("user.dir") + File.separator +
                                                   "data" + File.separator +
                                                "service" + File.separator +
                                              "workspace" + File.separator;
-      
-      
+                  
             // Recibimos el sujeto y lo deserializamos
             final ObjectInputStream ois = new ObjectInputStream( is );
             Subject client = (Subject) ois.readObject();
@@ -72,28 +72,47 @@ final class ComputingTask implements Runnable {
                 System.out.println("[+] Principal " + principalName + " recibido.");
             
                 CathegoryQuery cathegoryQuery = new CathegoryQuery(principal);
-                cathegory = cathegoryQuery.query(DB_USER, DB_PASSWORD);
+                
+                //PrivilegedAction<String> carhegoryQuery = new CathegoryQuery(principal);
+                //AccessController.doPrivileged(carhegoryQuery);
+                cathegory = AccessController.doPrivileged((PrivilegedAction<String>) () -> {
+                    try {
+                        return cathegoryQuery.query(DB_USER, DB_PASSWORD);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
+                        return "";
+                    }
+                });
+                
             }
-
+            
             // Se recibe y deposita el fichero jar
             final RandomStringGenerator rsg = new RandomStringGenerator();
             final String jarFileName = rsg.getString(12);
             final File jarFile = new File(path + jarFileName);
             final FileTransfer ft0 = new FileTransfer(is, jarFile);
-            ft0.transfer();
             
-            System.out.println("jarFileName: " + jarFileName);
-
+            AccessController.doPrivileged(new PrivilegedAction<Object>() {
+                @Override
+                public Object run() {
+                    try {
+                        ft0.transfer();
+                    } catch (IOException ex) {
+                        Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    return null;
+                }
+            });
+            //ft0.transfer();
+            
             // Se recibe y deposita el fichero con argumentos
             final String argsFileName = rsg.getString(12);
             final File argsFile = new File(path + argsFileName);
             final FileTransfer ft1 = new FileTransfer(is, argsFile);
             ft1.transfer();
-            System.out.println("argsFileName: " + argsFileName);
 
             // Se cargan los argumentos
             final String[] args = getArguments(argsFile);
-            System.out.println("args: " + Arrays.toString(args));
 
             System.out.println("[+] Preparando ejecutor");
             
@@ -101,20 +120,19 @@ final class ComputingTask implements Runnable {
             final String url = "file://localhost/" + path + jarFileName;
             System.out.println("url: " + url);
             
-            //PrivilegedAction jarRunner = new JarRunnerA( client, url, args );
+            PrivilegedExceptionAction jarRunner;
 
-            /*if ( cathegory.equals("A") ) {
+            if ( cathegory.equals("A") ) {
                 System.out.println("1 - Cathegory A");
                 jarRunner = new JarRunnerA( client, url, args );
                 System.out.println("2 - Cathegory A");
             } else {
                 jarRunner = new JarRunnerB( client, url, args );
                 System.out.println("Cathegory B");
-            }*/
+            }
             
             System.out.println("1 - new JarRunner()");
-            final JarRunner runner = new JarRunner(url, args);
-            System.out.println("2- new JarRunner()");
+            //final JarRunner runner = new JarRunner(url, args);
 
             // Redirects System.out and System.err to the socket output stream
             final PrintStream out = System.out;
@@ -125,9 +143,13 @@ final class ComputingTask implements Runnable {
             System.setErr(ps);
 
             System.out.println("AccessController.doPrivileged( jarRunner )");
-            //AccessController.doPrivileged( jarRunner );
-            // Jar file execution
-            runner.run();
+            try {
+                AccessController.doPrivileged( jarRunner );
+                // Jar file execution
+                //runner.run();
+            } catch (PrivilegedActionException ex) {
+                Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             // Restablishes System.out and System.err
             System.setOut(out);
@@ -142,8 +164,6 @@ final class ComputingTask implements Runnable {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
             Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -171,6 +191,11 @@ final class ComputingTask implements Runnable {
         } catch (final FileNotFoundException ex) {
             LOGGER.info("file with arguments not found");
             LOGGER.log(Level.WARNING, "file with arguments not found", ex.getCause());
+            throw ex;
+        } catch ( SecurityException ex ) {
+            System.out.println("sec ex");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.getCause());
             throw ex;
         }
     }

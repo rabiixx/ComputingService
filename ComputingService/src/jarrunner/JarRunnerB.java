@@ -1,13 +1,17 @@
 package jarrunner;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.AccessControlException;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.Subject;
 
-public class JarRunnerB {
+public class JarRunnerB extends JarRunner implements PrivilegedExceptionAction<Object>{
     
     final Subject subject;
     
@@ -15,13 +19,25 @@ public class JarRunnerB {
     static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 
     public JarRunnerB(Subject subject, String location, String[] args) throws MalformedURLException {
-        //super(location, args);
+        super(location, args);
         this.subject = subject;
-        System.out.println("JarRunnerB");
+        final String path = System.getProperty("user.dir") + File.separator +
+                                                  "data" + File.separator +
+                                               "client" + File.separator +
+                                             "traza.txt" + File.separator;
+        try {
+            FileWriter myWriter = new FileWriter(path);
+            myWriter.write("Files in Java might be tricky, but it is fun enough!");
+            myWriter.close();
+            System.out.println("JarRunnerB: Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
     
-    public void run() {
-        /*try {
+    public Object run() {
+        try {
             return Subject.doAsPrivileged(subject, ( PrivilegedAction ) () -> {
                 return super.run();
             }, null);
@@ -29,7 +45,7 @@ public class JarRunnerB {
             LOGGER.log( Level.WARNING, "sujeto sin permisos", ex );
             System.out.println( "Error: " + ex.getMessage() );
             return null;
-        }*/
+        }
     }
     
 }

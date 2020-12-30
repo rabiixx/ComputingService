@@ -47,11 +47,17 @@ public final class FileTransfer {
         this.outputIsFile = false;
     }
     
-    public void transfer () throws IOException {
-        if (outputIsFile)
-            transferToFile();
-        else
-            transferFromFile();
+    public void transfer () throws IOException, SecurityException {
+        System.out.println("transfer()");
+        try {
+            if (outputIsFile)
+                transferToFile();
+            else
+                transferFromFile();
+        } catch (SecurityException ex) {
+            System.out.println(ex.getCause());
+        }
+        
     }
     
     private void transferFromFile () throws IOException {
@@ -72,9 +78,11 @@ public final class FileTransfer {
         }
     }
     
-    private void transferToFile () throws IOException {
+    private void transferToFile () throws IOException, SecurityException {
+        System.out.println("1. transferToFile()");
         try (   final FileOutputStream fos = new FileOutputStream(file);
                 final InflaterOutputStream ios = new InflaterOutputStream(fos) ) {
+            System.out.println("2. " + this.getClass());
             final byte[] buffer = new byte[BLOCK_SIZE];
             for (int len = is.readInt(); len > 0; len = is.readInt()) {
                 is.read(buffer, 0, len);
@@ -82,8 +90,15 @@ public final class FileTransfer {
                 ios.flush();
             }
         } catch (final IOException ex) {
+            System.out.println("IOException");
             LOGGER.info(CLASS_NAME);
             LOGGER.log(Level.SEVERE, "", ex.getCause());
+            throw ex;
+        } catch ( final SecurityException ex ) {
+            System.out.println("SecurityException");
+            LOGGER.info(CLASS_NAME);
+            LOGGER.log(Level.SEVERE, "", ex.getCause());
+            System.out.println("Hola: " + ex.getMessage());
             throw ex;
         }
     }
