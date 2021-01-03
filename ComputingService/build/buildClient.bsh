@@ -1,0 +1,7 @@
+#!/bin/bash
+
+javac -Xlint:unchecked -Xlint:deprecation -d . ../src/filetransfer/*.java
+jar -cvf filetransfer.jar ./filetransfer/*.class
+
+javac -Xlint:unchecked -Xlint:deprecation -d . -cp filetransfer.jar ../src/client/*.java
+jar -cvf client.jar ./client/*

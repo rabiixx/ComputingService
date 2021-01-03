@@ -142,7 +142,7 @@ final class ComputingTask implements Runnable {
             System.setOut(ps);
             System.setErr(ps);
 
-            System.out.println("AccessController.doPrivileged( jarRunner )");
+            //System.out.println("AccessController.doPrivileged( jarRunner )");
             try {
                 AccessController.doPrivileged( jarRunner );
                 // Jar file execution
@@ -158,6 +158,8 @@ final class ComputingTask implements Runnable {
             // File deletion
             argsFile.delete();
             jarFile.delete();
+
+            System.out.println("Task Completed Successfully");
 
         } catch (final IOException ex) {
             LOGGER.log(Level.WARNING, "", ex.getCause());
