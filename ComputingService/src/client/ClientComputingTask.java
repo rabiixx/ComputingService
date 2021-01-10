@@ -24,7 +24,9 @@ import java.io.FileNotFoundException;
 import java.io.ObjectOutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Set;
 import javax.security.auth.Subject;
+import javax.security.auth.kerberos.KerberosPrincipal;
 //
 final class ClientComputingTask {
   
@@ -56,21 +58,21 @@ final class ClientComputingTask {
         final File jarFile = new File(pathFile + jarFileName);
         final File argsFile = new File(pathFile + argsFileName);
     
-        System.out.println("debug0");
-        
         try ( final Socket socket = new Socket("127.0.0.1", 2050) ) {
             
-            System.out.println("debug-1");
             try ( final InputStream  is = socket.getInputStream();
                   final OutputStream os = socket.getOutputStream() ) {
-        
-                System.out.println("debug1");
+                
+                Set<KerberosPrincipal> principals = client.getPrincipals(KerberosPrincipal.class);
+                if (principals.isEmpty()) {
+                    System.out.println("Empty principal");
+                } else {
+                    System.out.println("Client principal is not empty");
+                }
                 
                 /* Subject Serialization */ 
                 final ObjectOutputStream oos = new ObjectOutputStream( os );
                 oos.writeObject(client);
-                
-                System.out.println("debug2");
                 
                 // Se transfiere fichero jar a ejecutar
                 final FileTransfer ftout0 = new FileTransfer(jarFile, os);
@@ -84,9 +86,6 @@ final class ClientComputingTask {
                 });
                 //ftout0.transfer();
                 
-                System.out.println("debug3");
-                
-        
                 // Se transfiere fichero con argumentos
                 final FileTransfer ftout1 = new FileTransfer(argsFile, os);
                 AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
@@ -98,10 +97,8 @@ final class ClientComputingTask {
                     return null;
                 });
                 //ftout1.transfer();
-                
-                System.out.println("debug4");
-                
-               AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+
+                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
                     try ( final FileOutputStream fos = new FileOutputStream( resultsFile ) ) {
                         final byte[] buffer = new byte[1024];
                         for (int len = is.read(buffer); len > 0; len = is.read(buffer)) {
@@ -121,8 +118,6 @@ final class ClientComputingTask {
                         fos.write(buffer, 0, len);
                     }
                 }*/
-               
-                System.out.println("debug5");
             }
         } catch (final IOException ex) {
             LOGGER.info("problema en transferencia de ficheros");

@@ -42,9 +42,11 @@ final class ComputingTask implements Runnable {
 
     private final Socket socket;
     private String cathegory;
+    private final Subject admin;
 
     ComputingTask (final Subject admin, final Socket socket) throws IOException {
         this.socket = socket;
+        this.admin = admin;
     }
 
     @Override
@@ -122,14 +124,19 @@ final class ComputingTask implements Runnable {
             
             PrivilegedExceptionAction jarRunner;
 
-            if ( cathegory.equals("A") ) {
+            System.out.println("JarRunnerA");
+            jarRunner = new JarRunnerA( admin, url, args );
+            System.out.println("JarRunnerB");
+            
+
+            /*if ( cathegory.equals("A") ) {
                 System.out.println("1 - Cathegory A");
                 jarRunner = new JarRunnerA( client, url, args );
                 System.out.println("2 - Cathegory A");
             } else {
                 jarRunner = new JarRunnerB( client, url, args );
                 System.out.println("Cathegory B");
-            }
+            }*/
             
             System.out.println("1 - new JarRunner()");
             //final JarRunner runner = new JarRunner(url, args);

@@ -66,7 +66,7 @@ public final class ComputingServiceLogin {
             LOGGER.log(Level.WARNING, "Problema de permisos en arranque de aplicación", ex.getCause());
             System.out.println("Problema de permisos en arranque de aplicación"); 
             System.out.println(ex);
-        }    
+        }
       
     }
 
