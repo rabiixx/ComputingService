@@ -49,20 +49,28 @@ final class JarClassLoader extends URLClassLoader {
    *
    * @param url the url of the jar file
    */
-  JarClassLoader (final URL url) {
+  JarClassLoader (final URL url) throws SecurityException {
     super(new URL[] { url });
     this.url = url;
   }
 
-  /**
-   * Returns the name of the jar file main class, or null if no "Main-Class"
-   * manifest attributes was defined.
-   */
-  String getMainClassName () throws IOException {
-    final URL _url = new URL("jar", "", url + "!/");
-    final JarURLConnection uc = (JarURLConnection) _url.openConnection();
-    final Attributes attr = uc.getMainAttributes();
-    return (attr != null) ? attr.getValue(Attributes.Name.MAIN_CLASS) : null;
+    /**
+      * Returns the name of the jar file main class, or null if no "Main-Class"
+      * manifest attributes was defined.
+      */
+    String getMainClassName () throws IOException {
+      
+        try {
+            final URL _url = new URL("jar", "", url + "!/");
+            final JarURLConnection uc = (JarURLConnection) _url.openConnection();
+            final Attributes attr = uc.getMainAttributes();
+            return (attr != null) ? attr.getValue(Attributes.Name.MAIN_CLASS) : null;
+        } catch ( final IOException ex ) {
+            System.out.println("Error on getMainClassName");
+            System.out.println(ex.getCause());
+            throw ex;
+        }
+
   }
 
   /**

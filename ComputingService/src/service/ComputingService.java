@@ -73,20 +73,17 @@ public final class ComputingService implements Runnable {
         
         System.out.println("ComputingService.start()");
         
-        AccessController.doPrivileged( new PrivilegedAction<Void>() {
-            @Override
-            public Void run() {
-                try {
-                    if ( SINGLETON == null ) {
-                        SINGLETON = new ComputingService( admin, port, numThreads );
-                        CSE.submit( SINGLETON );
-                    }
-                } catch (Exception e) {
-                    System.out.println(e.getCause());
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            try {
+                if ( SINGLETON == null ) {
+                    SINGLETON = new ComputingService( admin, port, numThreads );
+                    CSE.submit( SINGLETON );
                 }
-                
-                return null;
+            } catch (Exception e) {
+                System.out.println(e.getCause());
             }
+            
+            return null;
         });
                 
         //if ( SINGLETON == null ) {
@@ -118,31 +115,24 @@ public final class ComputingService implements Runnable {
     @Override
     public void run () {
         
-        System.out.println("ComputingService.run()");
-        
         try {
-            
             
             final ServerSocket serverSocket = new ServerSocket( port );
         
-            LOGGER.info("ComputingService en operación");
-            
-            System.out.println( serverSocket.toString() );
+            LOGGER.info("[+] ComputingService en operación");
+            LOGGER.info( serverSocket.toString() );
             
             // Servicio ejecutor para implementar timeout en transacciones entrantes.
             final ExecutorService auxiliarExecutor = Executors.newSingleThreadExecutor();
             
-            do { // Bucle de escucha
+            do {
 
                 Socket socket = null;
                 
-                // Se reutiliza la tarea hasta que se complete
                 Future<Socket> future = auxiliarExecutor.submit( serverSocket::accept );
                 
                 do {
                     try {
-                        // La espera se interrumpe cada cierta cantidad de milisegundos
-                        // para conocer si el admnistrador ha detenido el servicio.
                         socket = future.get(INTERRUPTION_TIME1, MILLISECONDS);
                     } catch (final ExecutionException ex) {
                         LOGGER.log(Level.SEVERE, "Error al intentar obtener", ex);
@@ -154,14 +144,12 @@ public final class ComputingService implements Runnable {
                 } while ((!future.isDone()) && (!executorForTasks.isShutdown()));
                 
                 if ( future.isDone() ) {
-                    //LOGGER.info("Tarea entrante");
-                    System.out.println("Tarea entrante");
-                    final ComputingTask task = new ComputingTask(admin, socket);
-                    executorForTasks.submit(task);
+                    LOGGER.info("[+] Tarea entrante");
+                    final ComputingTask task = new ComputingTask( admin, socket );
+                    executorForTasks.submit( task );
                 }
             } while ( !executorForTasks.isShutdown());
             
-            // Se detiene el ejecutor empleado en el socket de escucha.
             auxiliarExecutor.shutdown();
 
         } catch (SecurityException ex) {
@@ -201,12 +189,9 @@ public final class ComputingService implements Runnable {
         } while (!executorForTasks.isTerminated());
         
         try {
-            Subject.doAsPrivileged(subject, new PrivilegedAction<Void>() {
-                @Override
-                public Void run() {
-                    CSE.shutdown();
-                    return null;
-                }
+            Subject.doAsPrivileged(subject, (PrivilegedAction<Void>) () -> {
+                CSE.shutdown();
+                return null;
             }, null);
         } catch ( final AccessControlException ex ) {
             LOGGER.log( Level.WARNING, "sujeto sin permisos", ex );

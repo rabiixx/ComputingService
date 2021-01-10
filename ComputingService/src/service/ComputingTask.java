@@ -23,17 +23,14 @@ import jarrunner.JarRunnerA;
 import jarrunner.JarRunnerB;
 import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
+import java.security.Permission;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Set;
 import javax.security.auth.kerberos.KerberosPrincipal;
 //
 final class ComputingTask implements Runnable {
 
-  
     static private final String DB_USER = "ComputingService";
     static private final String DB_PASSWORD = "PS2021";  
 
@@ -44,7 +41,7 @@ final class ComputingTask implements Runnable {
     private String cathegory;
     private final Subject admin;
 
-    ComputingTask (final Subject admin, final Socket socket) throws IOException {
+    ComputingTask ( final Subject admin, final Socket socket ) throws IOException {
         this.socket = socket;
         this.admin = admin;
     }
@@ -75,8 +72,6 @@ final class ComputingTask implements Runnable {
             
                 CathegoryQuery cathegoryQuery = new CathegoryQuery(principal);
                 
-                //PrivilegedAction<String> carhegoryQuery = new CathegoryQuery(principal);
-                //AccessController.doPrivileged(carhegoryQuery);
                 cathegory = AccessController.doPrivileged((PrivilegedAction<String>) () -> {
                     try {
                         return cathegoryQuery.query(DB_USER, DB_PASSWORD);
@@ -85,7 +80,6 @@ final class ComputingTask implements Runnable {
                         return "";
                     }
                 });
-                
             }
             
             // Se recibe y deposita el fichero jar
@@ -93,19 +87,7 @@ final class ComputingTask implements Runnable {
             final String jarFileName = rsg.getString(12);
             final File jarFile = new File(path + jarFileName);
             final FileTransfer ft0 = new FileTransfer(is, jarFile);
-            
-            AccessController.doPrivileged(new PrivilegedAction<Object>() {
-                @Override
-                public Object run() {
-                    try {
-                        ft0.transfer();
-                    } catch (IOException ex) {
-                        Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    return null;
-                }
-            });
-            //ft0.transfer();
+            ft0.transfer();
             
             // Se recibe y deposita el fichero con argumentos
             final String argsFileName = rsg.getString(12);
@@ -122,50 +104,69 @@ final class ComputingTask implements Runnable {
             final String url = "file://localhost/" + path + jarFileName;
             System.out.println("url: " + url);
             
-            PrivilegedExceptionAction jarRunner;
+            //PrivilegedExceptionAction jarRunner = null;
 
-            System.out.println("JarRunnerA");
-            jarRunner = new JarRunnerA( admin, url, args );
-            System.out.println("JarRunnerB");
-            
+            if ( cathegory.equals("A") ) {
+                
+                JarRunnerA jarRunner = new JarRunnerA( client, url, args );
+                
+                final PrintStream out = System.out;
+                final PrintStream err = System.err;
 
-            /*if ( cathegory.equals("A") ) {
-                System.out.println("1 - Cathegory A");
-                jarRunner = new JarRunnerA( client, url, args );
-                System.out.println("2 - Cathegory A");
+                final PrintStream ps = new PrintStream(os);
+                
+                /*Object context = null;
+                SecurityManager sm = System.getSecurityManager();
+                if (sm != null) context = sm.getSecurityContext();
+                
+                Permission p = new RuntimePermission("setIO");
+                if (sm != null) sm.checkPermission(p, context);
+                System.out.println("Allowed!");*/
+                
+                try {
+                    System.setOut(ps);
+                    System.setErr(ps);
+                } catch (final SecurityException ex) {
+                    System.out.println("Security exception {0}" + ex.getMessage());
+                }
+                
+                jarRunner.run();
+                
+                System.setOut(out);
+                System.setErr(err);
+                
+                try {
+                    argsFile.delete();
+                    jarFile.delete();    
+                } catch (final SecurityException ex) {
+                    System.out.println(ex.getMessage());
+                }
+                
             } else {
-                jarRunner = new JarRunnerB( client, url, args );
-                System.out.println("Cathegory B");
-            }*/
-            
-            System.out.println("1 - new JarRunner()");
-            //final JarRunner runner = new JarRunner(url, args);
+                
+                JarRunnerB jarRunner = new JarRunnerB( client, url, args );
+                
+                final PrintStream out = System.out;
+                final PrintStream err = System.err;
 
-            // Redirects System.out and System.err to the socket output stream
-            final PrintStream out = System.out;
-            final PrintStream err = System.err;
-
-            final PrintStream ps = new PrintStream(os);
-            System.setOut(ps);
-            System.setErr(ps);
-
-            //System.out.println("AccessController.doPrivileged( jarRunner )");
-            try {
-                AccessController.doPrivileged( jarRunner );
-                // Jar file execution
-                //runner.run();
-            } catch (PrivilegedActionException ex) {
-                Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
+                final PrintStream ps = new PrintStream(os);
+                System.setOut(ps);
+                System.setErr(ps);
+                
+                jarRunner.run();
+                
+                System.setOut(out);
+                System.setErr(err);
+                
+                try {
+                    argsFile.delete();
+                    jarFile.delete();    
+                } catch (final SecurityException ex) {
+                    System.out.println(ex.getMessage());
+                }
+                
             }
-
-            // Restablishes System.out and System.err
-            System.setOut(out);
-            System.setErr(err);
-
-            // File deletion
-            argsFile.delete();
-            jarFile.delete();
-
+            
             System.out.println("Task Completed Successfully");
 
         } catch (final IOException ex) {

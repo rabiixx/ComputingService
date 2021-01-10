@@ -48,30 +48,28 @@ public final class FileTransfer {
     }
     
     public void transfer () throws IOException, SecurityException {
-        System.out.println("transfer()");
-        try {
-            if (outputIsFile)
-                transferToFile();
-            else
-                transferFromFile();
-        } catch (SecurityException ex) {
-            System.out.println(ex.getCause());
-        }
-        
+        if (outputIsFile)
+            transferToFile();
+        else
+            transferFromFile();
     }
     
-    private void transferFromFile () throws IOException {
+    private void transferFromFile () throws IOException, SecurityException {
         try (   final FileInputStream fis = new FileInputStream(file);
                 final DeflaterInputStream dis = new DeflaterInputStream(fis);
                 final DataInputStream _dis = new DataInputStream(dis) ) {
+        
             final byte[] buffer = new byte[BLOCK_SIZE];
+            
             for (int len = _dis.read(buffer); len > 0; len = _dis.read(buffer)) {
                 os.writeInt(len);
                 os.write(buffer, 0, len);
                 os.flush();
             }
+            
             os.writeInt(0);
-        } catch (final IOException ex) {
+        
+        } catch (final IOException | SecurityException ex) {
             LOGGER.info(CLASS_NAME);
             LOGGER.log(Level.SEVERE, "", ex.getCause());
             throw ex;
@@ -79,23 +77,22 @@ public final class FileTransfer {
     }
     
     private void transferToFile () throws IOException, SecurityException {
-        System.out.println("1. transferToFile()");
         try (   final FileOutputStream fos = new FileOutputStream(file);
                 final InflaterOutputStream ios = new InflaterOutputStream(fos) ) {
-            System.out.println("2. " + this.getClass());
+            
             final byte[] buffer = new byte[BLOCK_SIZE];
+        
             for (int len = is.readInt(); len > 0; len = is.readInt()) {
                 is.read(buffer, 0, len);
                 ios.write(buffer, 0, len);
                 ios.flush();
             }
+        
         } catch (final IOException ex) {
-            System.out.println("IOException");
             LOGGER.info(CLASS_NAME);
             LOGGER.log(Level.SEVERE, "", ex.getCause());
             throw ex;
         } catch ( final SecurityException ex ) {
-            System.out.println("SecurityException");
             LOGGER.info(CLASS_NAME);
             LOGGER.log(Level.SEVERE, "", ex.getCause());
             System.out.println("Hola: " + ex.getMessage());
