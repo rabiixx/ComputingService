@@ -1,29 +1,34 @@
-// Kerberos Realm: LABOPROGSEGURA.UNAVARRA.ES princ:pwd
-// admin@LABOPROGSEGURA.UNAVARRA.ES : adminPS2021
+/*===========================================
+=            Service Policy File            =
+===========================================*/
 
 grant codeBase "file:${user.dir}/dist/main.jar" {
-    permission javax.security.auth.AuthPermission "createLoginContext.SERVICE";
-    permission java.lang.RuntimePermission "readFileDescriptor";
-    permission java.lang.RuntimePermission "writeFileDescriptor";
-};
-
-grant codeBase "file:${user.dir}/dist/service.jar" { 
-
-	permission java.lang.RuntimePermission "modifyThread";    
+	permission javax.security.auth.AuthPermission "createLoginContext.SERVICE";
+	permission java.lang.RuntimePermission "readFileDescriptor";
+	permission java.lang.RuntimePermission "writeFileDescriptor";
 	permission javax.security.auth.AuthPermission "doAsPrivileged";
-	
-	permission java.net.SocketPermission "localhost:2050", "listen,resolve";
-	permission java.net.SocketPermission "127.0.0.1:1024-", "accept,resolve";
-	permission java.util.PropertyPermission "user.dir", "read";
-
-	permission java.io.FilePermission "${user.dir}/data/service/database/*", "read";
-	permission java.io.FilePermission "${user.dir}/data/service/database", "read";
-
-	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read, write";
-	permission java.lang.RuntimePermission "setIO";
-	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "delete";
-
 };
+
+grant codeBase "file:${user.dir}/dist/service.jar" {
+	permission javax.security.auth.AuthPermission "doAsPrivileged";
+	permission java.lang.RuntimePermission "modifyThread";
+};
+
+grant codeBase "file:${user.dir}/dist/service.jar"
+	Principal javax.security.auth.x500.X500Principal "CN=admin, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown" {
+		
+		permission java.net.SocketPermission "localhost:2050", "listen,resolve";
+		permission java.net.SocketPermission "127.0.0.1:1024-", "accept,resolve";
+		permission java.util.PropertyPermission "user.dir", "read";
+
+		permission java.io.FilePermission "${user.dir}/data/service/database/*", "read";
+		permission java.io.FilePermission "${user.dir}/data/service/database", "read";
+
+		permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read, write";
+		permission java.lang.RuntimePermission "setIO";
+		permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "delete";
+};
+
 
 grant codeBase "file:${user.dir}/lib/h2-1.4.197.jar" {
 	permission java.io.FilePermission "${user.dir}/data/service/database/*", "read";
@@ -31,14 +36,33 @@ grant codeBase "file:${user.dir}/lib/h2-1.4.197.jar" {
 };
 
 grant codeBase "file:${user.dir}/dist/filetransfer.jar" { 
-	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "write";
+	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read, write";
 };
 
 grant codeBase "file:${user.dir}/dist/jarrunnera.jar" {
 	permission java.lang.RuntimePermission "createClassLoader";
+	permission javax.security.auth.AuthPermission "doAsPrivileged";
 	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read";
+
+	permission java.io.FilePermission "./fAAAAAAAAAAA=.data", "delete";
+	permission java.io.FilePermission "./fAAAAAAAAAAA=.data", "read, write";
+
 };
 
 grant codeBase "file:${user.dir}/dist/jarrunnerb.jar" {
 
 };
+
+grant codeBase "file:${user.dir}/data/client/client0.jar" {
+	permission java.io.FilePermission "./fAAAAAAAAAAA=.data", "delete";
+	permission java.io.FilePermission "./fAAAAAAAAAAA=.data", "read, write";
+
+	permission java.io.FilePermission "${user.dir}/data/client/fAAAAAAAAAAA=.data", "delete";
+	permission java.io.FilePermission "${user.dir}/data/client/fAAAAAAAAAAA=.data", "read, write";
+
+	 //permission java.security.AllPermission;
+};
+
+/*=====  End of Service Policy File  ======*/
+
+

@@ -24,70 +24,70 @@ import javax.security.auth.kerberos.KerberosPrincipal;
 //
 final class CathegoryQuery {
 
-  static private final String CLASS_NAME = CathegoryQuery.class.getName();
-  static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+    static private final String CLASS_NAME = CathegoryQuery.class.getName();
+    static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
   
-  private final byte[] idCode;
+    private final byte[] idCode;
   
-  CathegoryQuery (final KerberosPrincipal principal) throws NoSuchAlgorithmException {
-    try {
-      final String principalName = principal.getName();
-      final MessageDigest md = MessageDigest.getInstance("MD5");
-      this.idCode = md.digest(principalName.getBytes());
-    } catch (final NoSuchAlgorithmException ex) {
-      LOGGER.log(Level.SEVERE, "MD5 digest algorithm not provided", ex.getCause());
-      throw ex;
+    CathegoryQuery (final KerberosPrincipal principal) throws NoSuchAlgorithmException {
+        try {
+            final String principalName = principal.getName();
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            this.idCode = md.digest(principalName.getBytes());
+        } catch (final NoSuchAlgorithmException ex) {
+            LOGGER.log(Level.SEVERE, "MD5 digest algorithm not provided", ex.getCause());
+            throw ex;
+        }
     }
-  }
 
-  String query (final String dbUser, final String passwd)
-          throws SQLTimeoutException, SQLException {
+    String query (final String dbUser, final String passwd)
+            throws SQLTimeoutException, SQLException {
     
-    final String dbPath = System.getProperty("user.dir") + File.separator +
+        final String dbPath = System.getProperty("user.dir") + File.separator +
                                                   "data" + File.separator + 
                                                "service" + File.separator +
                                               "database" + File.separator +
                                                   "CSDB";
-    final String DB_URL = "jdbc:h2:file:" + dbPath;    
+        
+        final String DB_URL = "jdbc:h2:file:" + dbPath;    
           
-    try (final Connection connection =
+        try (final Connection connection =
             DriverManager.getConnection(DB_URL, dbUser, passwd)) {
     
-      final String selectStatement
-              = "SELECT Cathegory FROM engineers WHERE IdCode = ?";       
+            final String selectStatement
+                    = "SELECT Cathegory FROM engineers WHERE IdCode = ?";       
 
-      try (final PreparedStatement statement =
-              connection.prepareStatement(selectStatement)) {
-
-        statement.setBytes(1, idCode);
-
-        final ResultSet rs = statement.executeQuery();
-        String result = null;
-        while (rs.next()) {
-          result = rs.getString("Cathegory").trim();
-          break;
+            try (final PreparedStatement statement =
+                    connection.prepareStatement(selectStatement)) {
+                
+                statement.setBytes(1, idCode);
+                
+                final ResultSet rs = statement.executeQuery();
+                String result = null;
+                while (rs.next()) {
+                    result = rs.getString("Cathegory").trim();
+                    break;
+                }
+                
+                if (result != null)
+                    return result;
+                else
+                    throw new IllegalArgumentException("principal not found");
+            
+            } catch (final SQLException ex) {
+                LOGGER.info("error al realizar consulta");
+                LOGGER.severe(ex.getMessage());
+                throw ex;
+            }
+            
+        } catch (final SQLTimeoutException ex) {
+            LOGGER.info("timeout al establecer la conexion");
+            LOGGER.severe(ex.getMessage());
+            throw ex;
+        } catch (final SQLException ex) {
+            LOGGER.info("error al establecer la conexion");
+            LOGGER.severe(ex.getMessage());
+            throw ex;
         }
-        if (result != null)
-          return result;
-        else
-          throw new IllegalArgumentException("principal not found");
-
-      } catch (final SQLException ex) {
-        LOGGER.info("error al realizar consulta");
-        LOGGER.severe(ex.getMessage());
-        throw ex;
-      }
-
-    } catch (final SQLTimeoutException ex) {
-      LOGGER.info("timeout al establecer la conexion");
-      LOGGER.severe(ex.getMessage());
-      throw ex;
-    } catch (final SQLException ex) {
-      LOGGER.info("error al establecer la conexion");
-      LOGGER.severe(ex.getMessage());
-      throw ex;
     }
-
-  }
-
 }

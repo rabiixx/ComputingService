@@ -8,8 +8,6 @@ package client;
  */
 import com.sun.security.auth.callback.TextCallbackHandler;
 import java.security.AccessControlException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.util.logging.Level;
@@ -20,9 +18,9 @@ import javax.security.auth.login.LoginException;
 //
 public final class ClientLogin {
     
-    static private final String CLASS_NAME = ClientLogin.class.getName();
-    static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);
-    static private final Scanner SCANNER = new Scanner(System.in);
+    private static final String CLASS_NAME = ClientLogin.class.getName();
+    private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+    private static final Scanner SCANNER = new Scanner(System.in);
   
     static public void main (final String[] args) {
         
@@ -58,7 +56,6 @@ public final class ClientLogin {
             System.out.println("Autenticación fallida en arranque de la aplicación");
         } catch (final AccessControlException ex) {
             LOGGER.log(Level.WARNING, "Problema de permisos en arranque de aplicación", ex.getCause());
-            ex.printStackTrace();
             System.out.println("Problema de permisos en arranque de aplicación"); 
             System.out.println(ex);
         }
@@ -70,10 +67,10 @@ public final class ClientLogin {
         int opcion;
         do {
 
-            System.out.println("Opciones:");
-            System.out.println("  1 - Computar");
-            System.out.println("  0 - Salir");
-            System.out.print("Introduce opcion: ");
+            System.out.println("[+] Opciones:");
+            System.out.println("\t1 - Computar");
+            System.out.println("\t0 - Salir");
+            System.out.print("[+] Introduce opcion: ");
 
             try {
                 opcion = SCANNER.nextInt();
@@ -92,7 +89,6 @@ public final class ClientLogin {
             }
 
         } while (opcion != 0);
-        
     }
 
     static private void computar ( final Subject client ) {
@@ -113,10 +109,7 @@ public final class ClientLogin {
         final ClientComputingTask task =
             new ClientComputingTask(client, jarFileName, argsFileName, resultsFileName);
         
-        AccessController.doPrivileged((PrivilegedAction) () -> {
-            task.compute();
-            return null;
-        });
+        task.compute();
         
     }
     

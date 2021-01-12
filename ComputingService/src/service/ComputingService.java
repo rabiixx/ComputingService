@@ -71,45 +71,24 @@ public final class ComputingService implements Runnable {
     // Arranque del servicio; permitido solo al administrador
     static public void start ( final Subject admin, final int port, final int numThreads ) {
         
-        System.out.println("ComputingService.start()");
-        
-        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-            try {
-                if ( SINGLETON == null ) {
-                    SINGLETON = new ComputingService( admin, port, numThreads );
-                    CSE.submit( SINGLETON );
-                }
-            } catch (Exception e) {
-                System.out.println(e.getCause());
+        Subject.doAsPrivileged(admin, (PrivilegedAction<Object>) () -> {
+            if ( SINGLETON == null ) {
+                SINGLETON = new ComputingService( admin, port, numThreads );
+                CSE.submit( SINGLETON );
             }
-            
             return null;
-        });
-                
-        //if ( SINGLETON == null ) {
-        //    SINGLETON = new ComputingService( admin, port, numThreads );
-        //    CSE.submit( SINGLETON );
-        //}
+        }, null);
+        
     }
 
-     // Parada del servicio: permitido solo al administrador
+    // Parada del servicio: permitido solo al administrador
     static public void stop (final Subject admin) {
         
-        System.out.println("ComputingService.stot()");
+        Subject.doAsPrivileged(admin, (PrivilegedAction<Object>) () -> {
+            SINGLETON._stop(admin);
+            return null;
+        }, null);
         
-        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-            @Override
-            public Void run() {
-                try {
-                    SINGLETON._stop(admin);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
-                return null;
-            }
-        });
-        
-        //SINGLETON._stop(admin)
     }
 
     @Override
@@ -164,19 +143,8 @@ public final class ComputingService implements Runnable {
 
     private void _stop (final Subject subject) {
         
-        try {
-            Subject.doAsPrivileged(subject, (PrivilegedAction<Void>) () -> {
-                executorForTasks.shutdown();
-                return null;
-            }, null);
-        } catch ( final AccessControlException ex ) {
-            LOGGER.log( Level.WARNING, "sujeto sin permisos", ex );
-            System.out.println( "Error: " + ex.getMessage() );
-            return;
-        }
-      
         // Se detiene el bucle de escucha; no se admiten nuevas tareas.
-        //executorForTasks.shutdown();
+        executorForTasks.shutdown();
 
         // Bucle que espera a terminar todas las tareas en curso.
         do {
@@ -187,22 +155,11 @@ public final class ComputingService implements Runnable {
                 LOGGER.log(Level.SEVERE, "{0}", ex);
             }
         } while (!executorForTasks.isTerminated());
-        
-        try {
-            Subject.doAsPrivileged(subject, (PrivilegedAction<Void>) () -> {
-                CSE.shutdown();
-                return null;
-            }, null);
-        } catch ( final AccessControlException ex ) {
-            LOGGER.log( Level.WARNING, "sujeto sin permisos", ex );
-            System.out.println( "Error: " + ex.getMessage() );
-            return;
-        }
-        
+    
         // Se detiene el ejecutor para el método run().
-        //CSE.shutdown();
+        CSE.shutdown();
         
-        LOGGER.info("ComputingService detenido");
+        LOGGER.info("[+] ComputingService detenido");
     }
 
 }

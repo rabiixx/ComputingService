@@ -20,18 +20,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 //
 import filetransfer.FileTransfer;
-import java.io.FileNotFoundException;
 import java.io.ObjectOutputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Set;
 import javax.security.auth.Subject;
-import javax.security.auth.kerberos.KerberosPrincipal;
 //
 final class ClientComputingTask {
   
-    static private final String CLASS_NAME = ClientComputingTask.class.getName();
-    static private final Logger LOGGER = Logger.getLogger(CLASS_NAME);  
+    private static final String CLASS_NAME = ClientComputingTask.class.getName();
+    private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);  
   
     private final Subject client;
     private final String jarFileName;
@@ -47,13 +42,13 @@ final class ClientComputingTask {
         this.argsFileName = argsFileName;
         this.resultsFileName = resultsFileName;
     }
-                            
+    
     void compute () {
     
         final String pathFile = System.getProperty("user.dir") + File.separator +
                                                     "data" + File.separator +
                                                   "client" + File.separator;
-    
+        
         final File resultsFile = new File(pathFile + resultsFileName);
         final File jarFile = new File(pathFile + jarFileName);
         final File argsFile = new File(pathFile + argsFileName);
@@ -63,66 +58,29 @@ final class ClientComputingTask {
             try ( final InputStream  is = socket.getInputStream();
                   final OutputStream os = socket.getOutputStream() ) {
                 
-                Set<KerberosPrincipal> principals = client.getPrincipals(KerberosPrincipal.class);
-                if (principals.isEmpty()) {
-                    System.out.println("Empty principal");
-                } else {
-                    System.out.println("Client principal is not empty");
-                }
-                
-                /* Subject Serialization */ 
+                // Serializacion y transmision del sujeto
                 final ObjectOutputStream oos = new ObjectOutputStream( os );
                 oos.writeObject(client);
                 
                 // Se transfiere fichero jar a ejecutar
                 final FileTransfer ftout0 = new FileTransfer(jarFile, os);
-                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-                    try {
-                        ftout0.transfer();
-                    } catch (IOException ex) {
-                        Logger.getLogger(ClientComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    return null;
-                });
-                //ftout0.transfer();
+                ftout0.transfer();
                 
                 // Se transfiere fichero con argumentos
                 final FileTransfer ftout1 = new FileTransfer(argsFile, os);
-                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-                    try {
-                        ftout1.transfer();
-                    } catch (IOException ex) {
-                        Logger.getLogger(ClientComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    return null;
-                });
-                //ftout1.transfer();
+                ftout1.transfer();
 
-                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-                    try ( final FileOutputStream fos = new FileOutputStream( resultsFile ) ) {
-                        final byte[] buffer = new byte[1024];
-                        for (int len = is.read(buffer); len > 0; len = is.read(buffer)) {
-                            fos.write(buffer, 0, len);
-                        }
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(ClientComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ClientComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    return null;
-                });
-                
-               /*try ( final FileOutputStream fos = new FileOutputStream( resultsFile ) ) {
+                // Se escribe el resultado en el fichero de resultados
+                try ( final FileOutputStream fos = new FileOutputStream( resultsFile ) ) {
                     final byte[] buffer = new byte[1024];
                     for (int len = is.read(buffer); len > 0; len = is.read(buffer)) {
                         fos.write(buffer, 0, len);
                     }
-                }*/
+                }
             }
         } catch (final IOException ex) {
             LOGGER.info("problema en transferencia de ficheros");
             LOGGER.log(Level.SEVERE, "", ex.getCause());
-            ex.printStackTrace();
         }
     }
     

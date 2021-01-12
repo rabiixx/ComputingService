@@ -21,10 +21,7 @@ import javax.security.auth.Subject;
 import filetransfer.FileTransfer;
 import jarrunner.JarRunnerA;
 import jarrunner.JarRunnerB;
-import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
-import java.security.Permission;
-import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.util.Set;
 import javax.security.auth.kerberos.KerberosPrincipal;
@@ -71,15 +68,8 @@ final class ComputingTask implements Runnable {
                 System.out.println("[+] Principal " + principalName + " recibido.");
             
                 CathegoryQuery cathegoryQuery = new CathegoryQuery(principal);
+                cathegory = cathegoryQuery.query(DB_USER, DB_PASSWORD);
                 
-                cathegory = AccessController.doPrivileged((PrivilegedAction<String>) () -> {
-                    try {
-                        return cathegoryQuery.query(DB_USER, DB_PASSWORD);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
-                        return "";
-                    }
-                });
             }
             
             // Se recibe y deposita el fichero jar
@@ -102,10 +92,7 @@ final class ComputingTask implements Runnable {
             
             // Se prepara el ejecutor
             final String url = "file://localhost/" + path + jarFileName;
-            System.out.println("url: " + url);
             
-            //PrivilegedExceptionAction jarRunner = null;
-
             if ( cathegory.equals("A") ) {
                 
                 JarRunnerA jarRunner = new JarRunnerA( client, url, args );
@@ -115,20 +102,12 @@ final class ComputingTask implements Runnable {
 
                 final PrintStream ps = new PrintStream(os);
                 
-                /*Object context = null;
-                SecurityManager sm = System.getSecurityManager();
-                if (sm != null) context = sm.getSecurityContext();
-                
-                Permission p = new RuntimePermission("setIO");
-                if (sm != null) sm.checkPermission(p, context);
-                System.out.println("Allowed!");*/
-                
-                try {
+                /*try {
                     System.setOut(ps);
                     System.setErr(ps);
                 } catch (final SecurityException ex) {
                     System.out.println("Security exception {0}" + ex.getMessage());
-                }
+                }*/
                 
                 jarRunner.run();
                 
@@ -174,6 +153,8 @@ final class ComputingTask implements Runnable {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
             Logger.getLogger(ComputingTask.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

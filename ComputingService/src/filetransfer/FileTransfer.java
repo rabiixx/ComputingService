@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.DeflaterInputStream;
@@ -47,14 +50,15 @@ public final class FileTransfer {
         this.outputIsFile = false;
     }
     
-    public void transfer () throws IOException, SecurityException {
+    public void transfer () throws IOException {    
         if (outputIsFile)
             transferToFile();
         else
             transferFromFile();
+    
     }
     
-    private void transferFromFile () throws IOException, SecurityException {
+    private void transferFromFile () throws IOException {
         try (   final FileInputStream fis = new FileInputStream(file);
                 final DeflaterInputStream dis = new DeflaterInputStream(fis);
                 final DataInputStream _dis = new DataInputStream(dis) ) {
@@ -69,14 +73,14 @@ public final class FileTransfer {
             
             os.writeInt(0);
         
-        } catch (final IOException | SecurityException ex) {
+        } catch (final IOException ex) {
             LOGGER.info(CLASS_NAME);
-            LOGGER.log(Level.SEVERE, "", ex.getCause());
+            LOGGER.log(Level.SEVERE, "", ex.getMessage());
             throw ex;
         }
     }
     
-    private void transferToFile () throws IOException, SecurityException {
+    private void transferToFile () throws IOException {
         try (   final FileOutputStream fos = new FileOutputStream(file);
                 final InflaterOutputStream ios = new InflaterOutputStream(fos) ) {
             
@@ -87,15 +91,9 @@ public final class FileTransfer {
                 ios.write(buffer, 0, len);
                 ios.flush();
             }
-        
         } catch (final IOException ex) {
             LOGGER.info(CLASS_NAME);
-            LOGGER.log(Level.SEVERE, "", ex.getCause());
-            throw ex;
-        } catch ( final SecurityException ex ) {
-            LOGGER.info(CLASS_NAME);
-            LOGGER.log(Level.SEVERE, "", ex.getCause());
-            System.out.println("Hola: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "", ex.getMessage());
             throw ex;
         }
     }

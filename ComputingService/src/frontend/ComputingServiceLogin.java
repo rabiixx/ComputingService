@@ -45,20 +45,20 @@ public final class ComputingServiceLogin {
             loginContext.login();
 
             final Subject admin = loginContext.getSubject();
-
+            
             ComputingService.start( admin, 2050, 10 );
             
-            menu( admin );
+            menu();
             
             ComputingService.stop( admin );
-                
+            
             try {
                 loginContext.logout();
             } catch (final LoginException ex) {
                 LOGGER.log(Level.SEVERE, "Fallo al eliminar el contexto de login", ex.getCause());
                 System.out.println("Fallo al eliminar el contexto de login");
             }
-        
+            
         } catch (final LoginException ex) {
             LOGGER.log(Level.WARNING, "Autenticación fallida en arranque de la aplicación", ex.getCause());
             System.out.println("Autenticación fallida en arranque de la aplicación");
@@ -67,17 +67,17 @@ public final class ComputingServiceLogin {
             System.out.println("Problema de permisos en arranque de aplicación"); 
             System.out.println(ex);
         }
-      
+        
     }
 
-    static private void menu ( final Subject subject ) {
+    static private void menu () {
 
         int opcion;
 
         do {
-            System.out.println("Opciones:");
-            System.out.println("0 - Salir");
-            System.out.print("Introduce opcion: ");
+            System.out.println("[+] Opciones:");
+            System.out.println("\t0 - Salir");
+            System.out.print("[+] Introduce opcion: ");
             
             try {
                 opcion = SCANNER.nextInt();

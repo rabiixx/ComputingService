@@ -35,13 +35,10 @@ package jarrunner;
  * Modified by MAZ
  *
  */
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.reflect.InvocationTargetException;
-import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Level;
@@ -83,7 +80,7 @@ class JarRunner {
     protected Object run () {
 
         // Create the class classLoader for the application jar file
-        JarClassLoader classLoader = AccessController.doPrivileged((PrivilegedAction<JarClassLoader>) () -> {
+        /*JarClassLoader classLoader = AccessController.doPrivileged((PrivilegedAction<JarClassLoader>) () -> {
             try {
                 return new JarClassLoader(url);
             } catch (SecurityException ex) {
@@ -92,8 +89,9 @@ class JarRunner {
                 ex.printStackTrace();
                 return null;
             }
-        });
+        });*/
         
+        JarClassLoader classLoader = new JarClassLoader(url);
         
         // Get the application's main class className
         final String className; 
@@ -114,28 +112,36 @@ class JarRunner {
             return null;
         }
 
-        try {
 
-            // Invoke application's main class
-            classLoader.invokeClass(className, args);
+        // Invoke application's main class
+        System.out.println("###########invoke");
+        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            try {
+                classLoader.invokeClass(className, args);
+            } catch (final ClassNotFoundException ex) {
+                LOGGER.info(CLASS_NOT_FOUND);
+                LOGGER.log(Level.WARNING, "JarRunner: class {0} not found", className);
+                System.err.println(CLASS_NOT_FOUND);
+            } catch (final NoSuchMethodException ex) {
+                LOGGER.info(NO_MAIN_METHOD);
+                LOGGER.log(Level.WARNING, "JarRunner: class {0} does not define a method main()", className);
+                System.err.println(NO_MAIN_METHOD);
+            } catch (final IllegalAccessException ex) {
+                LOGGER.info(CAN_NOT_BE_LOADED);
+                LOGGER.log(Level.WARNING, "JarRunner: class {0} cannot be loaded", className);
+                System.err.println(CAN_NOT_BE_LOADED);
+            } catch (final InvocationTargetException ex) {
+                System.out.println("Error InvocationTargetException");
+                LOGGER.info(EXCEPTION_THROWN);
+                System.out.println(ex.getCause());
+                System.out.println(ex.getMessage());
+                LOGGER.log(Level.WARNING, "JarRunner: method exception thrown", ex.getTargetException());
+                System.err.println(EXCEPTION_THROWN);
+            }
+            return null;
+        });
       
-        } catch (final ClassNotFoundException ex) {
-            LOGGER.info(CLASS_NOT_FOUND);
-            LOGGER.log(Level.WARNING, "JarRunner: class {0} not found", className);
-            System.err.println(CLASS_NOT_FOUND);
-        } catch (final NoSuchMethodException ex) {
-            LOGGER.info(NO_MAIN_METHOD);
-            LOGGER.log(Level.WARNING, "JarRunner: class {0} does not define a method main()", className);
-            System.err.println(NO_MAIN_METHOD);
-        } catch (final IllegalAccessException ex) {
-            LOGGER.info(CAN_NOT_BE_LOADED);
-            LOGGER.log(Level.WARNING, "JarRunner: class {0} cannot be loaded", className);
-            System.err.println(CAN_NOT_BE_LOADED);
-        } catch (final InvocationTargetException ex) {
-            LOGGER.info(EXCEPTION_THROWN);
-            LOGGER.log(Level.WARNING, "JarRunner: method exception thrown", ex.getTargetException());
-            System.err.println(EXCEPTION_THROWN);
-        }
+        
     
         return null;
 

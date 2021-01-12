@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.Subject;
 
-public class JarRunnerB extends JarRunner implements PrivilegedExceptionAction<Object>{
+public class JarRunnerB extends JarRunner {
     
     final Subject subject;
     
@@ -21,24 +21,12 @@ public class JarRunnerB extends JarRunner implements PrivilegedExceptionAction<O
     public JarRunnerB(Subject subject, String location, String[] args) throws MalformedURLException {
         super(location, args);
         this.subject = subject;
-        final String path = System.getProperty("user.dir") + File.separator +
-                                                  "data" + File.separator +
-                                               "client" + File.separator +
-                                             "traza.txt" + File.separator;
-        try {
-            FileWriter myWriter = new FileWriter(path);
-            myWriter.write("Files in Java might be tricky, but it is fun enough!");
-            myWriter.close();
-            System.out.println("JarRunnerB: Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
     }
     
+    @Override
     public Object run() {
         try {
-            return Subject.doAsPrivileged(subject, ( PrivilegedAction ) () -> {
+            return Subject.doAsPrivileged(subject, ( PrivilegedAction<Object> ) () -> {
                 return super.run();
             }, null);
         } catch ( final AccessControlException ex ) {

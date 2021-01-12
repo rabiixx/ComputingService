@@ -1,6 +1,9 @@
 package jarrunner;
 
 import java.net.MalformedURLException;
+import java.security.AccessControlException;
+import java.security.PrivilegedAction;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.Subject;
 
@@ -19,9 +22,7 @@ public class JarRunnerA extends JarRunner {
     
     @Override
     public Object run() {
-        super.run();
-        return null;
-        /*try {
+        try {
             return Subject.doAsPrivileged(subject, ( PrivilegedAction ) () -> {
                 return super.run();
             }, null);
@@ -29,7 +30,7 @@ public class JarRunnerA extends JarRunner {
             LOGGER.log( Level.WARNING, "sujeto sin permisos", ex );
             System.out.println( "Error: " + ex.getMessage() );
             return null;
-        }*/
+        }
     }
 
 }
