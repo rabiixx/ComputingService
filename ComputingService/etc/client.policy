@@ -1,4 +1,3 @@
-
 // Kerberos Realm: LABOPROGSEGURA.UNAVARRA.ES princ:pwd
 // ligeti@LABOPROGSEGURA.UNAVARRA.ES : ligetiPS2021
 // geyer@LABOPROGSEGURA.UNAVARRA.ES : geyerPS2021
@@ -18,6 +17,7 @@ grant codeBase "file:${user.dir}/dist/client.jar" {
     permission java.io.FilePermission "${user.dir}/data/client/pi.txt", "write";
 
     permission java.io.FilePermission "${user.dir}/data/client/client0.jar", "read";
+    permission java.io.FilePermission "${user.dir}/data/client/client1.jar", "read";
     permission java.io.FilePermission "${user.dir}/data/client/empty", "read, write";
 
 };
@@ -29,6 +29,7 @@ grant codeBase "file:${user.dir}/dist/filetransfer.jar" {
     permission java.io.FilePermission "${user.dir}/data/client/piargs.txt", "read";
 
     permission java.io.FilePermission "${user.dir}/data/client/client0.jar", "read";
+    permission java.io.FilePermission "${user.dir}/data/client/client1.jar", "read";
     permission java.io.FilePermission "${user.dir}/data/client/empty", "read";
 
 };

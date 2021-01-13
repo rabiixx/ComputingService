@@ -1,12 +1,8 @@
 package jarrunner;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.AccessControlException;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.Subject;

@@ -17,13 +17,12 @@ public class JarRunnerA extends JarRunner {
     public JarRunnerA( final Subject subject, String location, String[] args) throws MalformedURLException {
         super(location, args);
         this.subject = subject;
-
     }
     
     @Override
     public Object run() {
         try {
-            return Subject.doAsPrivileged(subject, ( PrivilegedAction ) () -> {
+            return Subject.doAsPrivileged(subject, ( PrivilegedAction<Object> ) () -> {
                 return super.run();
             }, null);
         } catch ( final AccessControlException ex ) {

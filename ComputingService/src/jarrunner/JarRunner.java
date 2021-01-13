@@ -78,18 +78,6 @@ class JarRunner {
     }
 
     protected Object run () {
-
-        // Create the class classLoader for the application jar file
-        /*JarClassLoader classLoader = AccessController.doPrivileged((PrivilegedAction<JarClassLoader>) () -> {
-            try {
-                return new JarClassLoader(url);
-            } catch (SecurityException ex) {
-                System.out.println("Error JarClassLoader");
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-                return null;
-            }
-        });*/
         
         JarClassLoader classLoader = new JarClassLoader(url);
         
@@ -112,9 +100,7 @@ class JarRunner {
             return null;
         }
 
-
         // Invoke application's main class
-        System.out.println("###########invoke");
         AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
             try {
                 classLoader.invokeClass(className, args);

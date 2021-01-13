@@ -94,6 +94,7 @@ public final class FileTransfer {
         } catch (final IOException ex) {
             LOGGER.info(CLASS_NAME);
             LOGGER.log(Level.SEVERE, "", ex.getMessage());
+            System.out.println(ex);
             throw ex;
         }
     }
