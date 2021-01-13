@@ -37,7 +37,6 @@ grant codeBase "file:${user.dir}/lib/h2-1.4.197.jar" {
 
 grant codeBase "file:${user.dir}/dist/filetransfer.jar" { 
 	permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read, write";
-
 };
 
 grant codeBase "file:${user.dir}/dist/jarrunnera.jar" {
@@ -61,12 +60,13 @@ grant codeBase "file:${user.dir}/data/client/pi.jar" {};
 
 // Privilegios de ejecucion: categoria B.
 grant codeBase "file:${user.dir}/data/client/client0.jar" {
+	permission java.security.AllPermission;
 	permission java.io.FilePermission "./fAAAAAAAAAAA=.data", "write, delete";
 };
 
 // Privilegios: ninguna categoria.
+//permission java.net.SocketPermission "172.18.69.225:7689", "connect,resolve";
 grant codeBase "file:${user.dir}/data/client/client1.jar" {
-	//permission java.net.SocketPermission "172.18.69.225:7689", "connect,resolve";
 };
 
 /*=====  End of Service Policy File  ======*/

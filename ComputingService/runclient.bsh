@@ -3,6 +3,6 @@
 java -Djava.security.manager \
 -Djava.security.policy=./etc/client.policy \
 -Djava.security.auth.login.config=./etc/client.conf \
--Djava.security.krb5.realm=LABOPROGSEGURA.UNAVARRA.ES \
--Djava.security.krb5.kdc=127.0.0.1 \
+-Djava.security.krb5.realm=COMPUTINGSERVICE.PEAK.COM \
+-Djava.security.krb5.kdc=eim-alu-69225.lab.unavarra.es \
 -cp ./dist/client.jar:./dist/filetransfer.jar client.ClientLogin
