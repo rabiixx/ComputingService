@@ -66,10 +66,9 @@ final class ComputingTask implements Runnable {
                 KerberosPrincipal principal = principals.iterator().next();
                 final String principalName = principal.getName();
                 System.out.println("[+] Principal " + principalName + " recibido.");
-            
+                
                 CathegoryQuery cathegoryQuery = new CathegoryQuery(principal);
                 cathegory = cathegoryQuery.query(DB_USER, DB_PASSWORD);
-                
             }
             
             // Se recibe y deposita el fichero jar
@@ -102,12 +101,12 @@ final class ComputingTask implements Runnable {
 
                 final PrintStream ps = new PrintStream(os);
                 
-                /*try {
+                try {
                     System.setOut(ps);
                     System.setErr(ps);
                 } catch (final SecurityException ex) {
                     System.out.println("Security exception {0}" + ex.getMessage());
-                }*/
+                }
                 
                 jarRunner.run();
                 
@@ -120,7 +119,7 @@ final class ComputingTask implements Runnable {
                 } catch (final SecurityException ex) {
                     System.out.println(ex.getMessage());
                 }
-                
+                System.out.println("Task Completed Successfully");
             } else {
                 
                 JarRunnerB jarRunner = new JarRunnerB( client, url, args );
@@ -143,10 +142,9 @@ final class ComputingTask implements Runnable {
                 } catch (final SecurityException ex) {
                     System.out.println(ex.getMessage());
                 }
-                
+                System.out.println("Task Completed Successfully");
             }
             
-            System.out.println("Task Completed Successfully");
 
         } catch (final IOException ex) {
             LOGGER.log(Level.WARNING, "", ex.getCause());

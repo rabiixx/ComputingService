@@ -1,0 +1,5 @@
+java.security.AccessControlException: access denied ("java.io.FilePermission" "./fAAAAAAAAAAA=.data" "write")
+Error InvocationTargetException
+java.security.AccessControlException: access denied ("java.io.FilePermission" "./fAAAAAAAAAAA=.data" "delete")
+null
+method exception thrown

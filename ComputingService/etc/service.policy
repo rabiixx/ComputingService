@@ -47,6 +47,9 @@ grant codeBase "file:${user.dir}/dist/jarrunnera.jar" {
 };
 
 grant codeBase "file:${user.dir}/dist/jarrunnerb.jar" {
+	permission javax.security.auth.AuthPermission "doAsPrivileged";
+    permission java.lang.RuntimePermission "createClassLoader";
+    permission java.io.FilePermission "${user.dir}/data/service/workspace/*", "read";
     permission java.io.FilePermission "./fAAAAAAAAAAA=.data", "write, delete";
 };
 
@@ -63,7 +66,7 @@ grant codeBase "file:${user.dir}/data/client/client0.jar" {
 
 // Privilegios: ninguna categoria.
 grant codeBase "file:${user.dir}/data/client/client1.jar" {
-	permission java.net.SocketPermission "172.18.69.225:7689", "connect,resolve";
+	//permission java.net.SocketPermission "172.18.69.225:7689", "connect,resolve";
 };
 
 /*=====  End of Service Policy File  ======*/
